@@ -1,0 +1,4 @@
+*.md
+doc*
+__pycache__
+datasets
