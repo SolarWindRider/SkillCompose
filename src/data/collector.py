@@ -505,15 +505,21 @@ class SkillCollector:
         return "general"
 
     def _generate_skill_id(self, filename: str) -> str:
-        """Generate skill_id from filename or URL"""
-        # Extract last part of URL
-        match = re.search(r'skills/([\w-]+)$', filename)
+        """Generate skill_id from filename or URL
+
+        1. Extract skill name (remove author prefix to merge same-name skills)
+        2. Fix duplicate 'skills/' prefix issue
+        3. Use skill name (not author/name) for consistent ID across authors
+        """
+        # Handle paths like "skills/amekala/skill-name" -> extract "skill-name"
+        # Or "skills/author/skill-name" -> extract "skill-name" only
+        match = re.search(r'skills/(?:[\w-]+/)?([\w-]+)$', filename)
         if match:
             name = match.group(1)
         else:
             name = filename.replace('.md', '').replace('.yaml', '').replace('.yml', '').replace('.json', '')
 
-        # Hash to get consistent ID
+        # Hash to get consistent ID - same name = same ID regardless of author
         hash_suffix = hashlib.md5(name.encode()).hexdigest()[:6]
         return f"skill_{name[:30]}_{hash_suffix}"
 
